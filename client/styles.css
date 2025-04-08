@@ -1,0 +1,145 @@
+/* Base Styles */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #222;
+  background: url('bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  transition: background 0.5s ease-in-out;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1 {
+  margin: 0;
+}
+
+#scoreboard {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#toggleTheme {
+  padding: 8px 16px;
+  border: none;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.night {
+  background: #111 !important;
+  color: #fff;
+}
+
+.night header {
+  background: rgba(20, 20, 20, 0.9);
+}
+
+#taskForm {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#taskForm input,
+#taskForm select,
+#taskForm button {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#taskForm button {
+  background: #28a745;
+  color: white;
+  border: none;
+  transition: 0.3s;
+}
+
+#taskForm button:hover {
+  background: #218838;
+}
+
+main {
+  padding: 20px;
+}
+
+.task-item {
+  background: rgba(255, 255, 255, 0.85);
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.task-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.task-deadline, .task-type {
+  font-size: 14px;
+  color: #555;
+}
+
+.task-type.badge {
+  background: #007bff;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.remaining-time {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.progress-bar {
+  background: #ddd;
+  height: 8px;
+  border-radius: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: #28a745;
+  height: 100%;
+  transition: width 1s linear;
+}
+
+.complete-btn {
+  margin-top: 10px;
+  background: #ffc107;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.complete-btn:hover {
+  background: #e0a800;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

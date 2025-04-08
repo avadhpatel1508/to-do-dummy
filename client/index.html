@@ -1,0 +1,50 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Course Task Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="background-image">
+    <header>
+      <h1>📚 Course Task Manager</h1>
+      <div id="scoreboard">⭐ Score: <span id="scoreDisplay">0</span></div>
+      <button id="toggleTheme">🌙 Night Mode</button>
+      <button onclick="logout()">🚪 Logout</button>
+    </header>
+
+    <section id="taskForm">
+      <input type="text" id="taskTitle" placeholder="Enter task title..." />
+      <input type="datetime-local" id="taskDeadline" />
+      <select id="taskType">
+        <option value="quiz">Quiz</option>
+        <option value="assignment">Assignment</option>
+        <option value="project">Project</option>
+      </select>
+      <button onclick="addTask()">➕ Add Task</button>
+    </section>
+
+    <main>
+      <h2>📝 Quiz Tasks</h2>
+      <div id="quizTasks"></div>
+      <h2>📄 Assignment Tasks</h2>
+      <div id="assignmentTasks"></div>
+      <h2>💻 Project Tasks</h2>
+      <div id="projectTasks"></div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+      // Check user login
+      if (!localStorage.getItem("currentUser")) {
+        window.location.href = "login.html";
+      }
+
+      function logout() {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+      }
+    </script>
+  </body>
+  </html>

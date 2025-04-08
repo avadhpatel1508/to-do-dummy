@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completed Tasks History</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .completed-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .task-history-item {
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      color: white;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .quiz {
+      background-color: #ff6f61;
+    }
+    .assignment {
+      background-color: #4caf50;
+    }
+    .project {
+      background-color: #2196f3;
+    }
+    .task-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .task-detail {
+      font-size: 14px;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="completed-container">
+    <h2>Completed Tasks History</h2>
+    <div id="completedList"></div>
+  </div>
+
+  <script>
+    const currentUser = localStorage.getItem("currentUser") || "guest";
+    const completed = JSON.parse(localStorage.getItem(`${currentUser}_completed`)) || [];
+    const container = document.getElementById("completedList");
+
+    function formatRemainingTime(deadline, addedAt) {
+      const remaining = Math.max(0, new Date(deadline).getTime() - new Date(addedAt).getTime());
+      const totalSeconds = Math.floor(remaining / 1000);
+      const days = Math.floor(totalSeconds / (3600 * 24));
+      const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    if (completed.length === 0) {
+      container.innerHTML = '<p>No completed tasks yet.</p>';
+    } else {
+      completed.forEach(task => {
+        const taskEl = document.createElement("div");
+        taskEl.className = `task-history-item ${task.type}`;
+        const remainingString = formatRemainingTime(task.deadline, task.addedAt);
+        taskEl.innerHTML = `
+          <div class="task-title">${task.title}</div>
+          <div class="task-detail">Type: ${task.type}</div>
+          <div class="task-detail">Due: ${new Date(task.deadline).toLocaleString()}</div>
+          <div class="task-detail">Completed At: ${new Date(task.completedAt).toLocaleString()}</div>
+          <div class="task-detail">Time Given: ${remainingString}</div>
+        `;
+        container.appendChild(taskEl);
+      });
+    }
+  </script>
+</body>
+</html>
