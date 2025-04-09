@@ -2,6 +2,7 @@ let currentUser = localStorage.getItem("currentUser") || "guest";
 let score = parseInt(localStorage.getItem(`${currentUser}_score`)) || 0;
 let tasks = JSON.parse(localStorage.getItem(`${currentUser}_tasks`)) || [];
 let completed = JSON.parse(localStorage.getItem(`${currentUser}_completed`)) || [];
+let editingTaskIndex = null;
 
 function generateCSV(data) {
   const header = Object.keys(data[0] || {}).join(",");
@@ -25,13 +26,25 @@ function addTask() {
 
   if (!title || !deadline || !type) return;
 
-  const createdAt = new Date();
-  tasks.push({ title, deadline, type, createdAt: createdAt.toISOString() });
+  const now = new Date();
+
+  if (editingTaskIndex !== null) {
+    tasks[editingTaskIndex] = {
+      ...tasks[editingTaskIndex],
+      title,
+      deadline,
+      type
+    };
+    editingTaskIndex = null;
+    document.getElementById("addBtn").textContent = "➕ Add Task";
+  } else {
+    tasks.push({ title, deadline, type, createdAt: now.toISOString() });
+  }
+
   saveTasks();
   document.getElementById("taskTitle").value = '';
   document.getElementById("taskDeadline").value = '';
   document.getElementById("taskType").value = 'quiz';
-
   renderTasks();
 }
 
@@ -42,6 +55,14 @@ function completeTask(index) {
   saveTasks();
   localStorage.setItem(`${currentUser}_score`, score);
   renderTasks();
+}
+
+function deleteTask(index) {
+  if (confirm("Are you sure you want to delete this task?")) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+  }
 }
 
 function saveTasks() {
@@ -84,7 +105,10 @@ function renderTasks() {
           <div class="progress-bar-fill"></div>
         </div>
       </div>
-      <button class="complete-btn" onclick="completeTask(${index})">Complete</button>
+      <div class="task-controls">
+        <button class="complete-btn" onclick="completeTask(${index})">✅ Complete</button>
+        <button class="complete-btn" style="background-color: #dc2626;" onclick="deleteTask(${index})">🗑️ Delete</button>
+      </div>
     `;
 
     if (task.type === "quiz") quizTasks.appendChild(taskEl);
@@ -119,9 +143,11 @@ function updateRemainingTimes() {
   });
 }
 
+// Initial rendering
 renderTasks();
 setInterval(updateRemainingTimes, 1000);
 
+// Theme toggle
 const toggleThemeBtn = document.getElementById('toggleTheme');
 window.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme');
@@ -142,7 +168,9 @@ toggleThemeBtn.addEventListener('click', () => {
   toggleThemeBtn.textContent = isNight ? '☀️ Light Mode' : '🌙 Night Mode';
 });
 
-const scoreboard = document.getElementById("scoreboard");
-scoreboard.addEventListener('click', () => {
+// History button
+const scoreboardBtn = document.getElementById("scoreboard");
+scoreboardBtn.addEventListener('click', () => {
+  localStorage.setItem("historyPageUser", currentUser);
   window.location.href = "history.html";
 });

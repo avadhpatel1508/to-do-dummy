@@ -6,6 +6,7 @@
   <title>Course Task Manager</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
+    /* Same CSS as before, with modal styles added */
     body {
       font-family: "Segoe UI", sans-serif;
       margin: 0;
@@ -155,13 +156,57 @@
       background: #3b82f6;
       transition: width 0.3s ease;
     }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .modal-content input,
+    .modal-content select {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ddd;
+    }
+
+    .modal-content button {
+      margin-top: 1rem;
+      background: #2563eb;
+      color: white;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <header>
     <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
       <h1 style="margin: 0;">📚 Course Task Manager</h1>
-      <button onclick="window.location.href='index.html'">📘 Courses</button>
+      <button onclick="window.location.href='course.html'">📘 Courses</button>
       <button onclick="window.location.href='add-course.html'">➕ Add Course</button>
     </div>
     <div>
@@ -170,7 +215,6 @@
       <button onclick="logout()">🚪 Logout</button>
     </div>
   </header>
-  
 
   <section id="taskForm">
     <input type="text" id="taskTitle" placeholder="Enter task title..." />
@@ -192,7 +236,22 @@
     <div id="projectTasks"></div>
   </main>
 
+  <!-- Edit Task Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <input type="text" id="editTaskTitle" placeholder="Edit task title..." />
+      <input type="datetime-local" id="editTaskDeadline" />
+      <select id="editTaskType">
+        <option value="quiz">Quiz</option>
+        <option value="assignment">Assignment</option>
+        <option value="project">Project</option>
+      </select>
+      <button onclick="saveEditedTask()">💾 Save Changes</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
+  <script src="theme.js"></script>
   <script>
     if (!localStorage.getItem("currentUser")) {
       window.location.href = "login.html";

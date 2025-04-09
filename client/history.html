@@ -2,85 +2,233 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Completed Tasks History</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Task History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f9f9f9;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
     }
-    .completed-container {
-      max-width: 800px;
-      margin: 0 auto;
+
+    body.night {
+      background-color: #111111;
+      color: #f4f4f4;
     }
-    .task-history-item {
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 10px;
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .task-card {
+      margin: 1rem 0;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      animation: fadeInUp 0.4s ease both;
+      color: #333;
+    }
+
+    .quiz-card {
+      background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+    }
+
+    .assignment-card {
+      background: linear-gradient(135deg, #bbf7d0, #86efac);
+    }
+
+    .project-card {
+      background: linear-gradient(135deg, #ddd6fe, #c4b5fd);
+    }
+
+    .task-header {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .task-header span.icon {
+      font-size: 1.3rem;
+    }
+
+    .task-meta {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    body.night .task-meta {
+      color: #111111;
+    }
+
+    .btns {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.6rem 1.2rem;
+      margin: 0.3rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .download-btn {
+      background: #2563eb;
       color: white;
-      animation: fadeIn 0.5s ease-in-out;
     }
-    .quiz {
-      background-color: #ff6f61;
+
+    .home-btn {
+      background: #10b981;
+      color: white;
     }
-    .assignment {
-      background-color: #4caf50;
+
+    .theme-btn {
+      background: #f59e0b;
+      color: white;
     }
-    .project {
-      background-color: #2196f3;
+
+    button:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
     }
-    .task-title {
-      font-weight: bold;
-      font-size: 18px;
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .task-detail {
-      font-size: 14px;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+
+    .no-tasks {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      opacity: 0.6;
     }
   </style>
 </head>
 <body>
-  <div class="completed-container">
-    <h2>Completed Tasks History</h2>
-    <div id="completedList"></div>
+  <div class="container">
+    <h1>✅ Completed Task History</h1>
+    <div id="taskHistory"></div>
+
+    <div class="no-tasks" id="noTasks" style="display: none;">No completed tasks yet!</div>
+
+    <div class="btns">
+      <button class="download-btn" onclick="downloadCSV()">📄 Download CSV</button>
+      <button class="theme-btn" onclick="toggleTheme()">🌓 Toggle Theme</button>
+      <button class="home-btn" onclick="goHome()">🏠 Home</button>
+    </div>
   </div>
 
   <script>
-    const currentUser = localStorage.getItem("currentUser") || "guest";
-    const completed = JSON.parse(localStorage.getItem(`${currentUser}_completed`)) || [];
-    const container = document.getElementById("completedList");
+    const currentUser = localStorage.getItem("historyPageUser") || "guest";
+    const completedTasks = JSON.parse(localStorage.getItem(`${currentUser}_completed`)) || [];
+    const taskContainer = document.getElementById("taskHistory");
+    const noTasks = document.getElementById("noTasks");
 
-    function formatRemainingTime(deadline, addedAt) {
-      const remaining = Math.max(0, new Date(deadline).getTime() - new Date(addedAt).getTime());
-      const totalSeconds = Math.floor(remaining / 1000);
-      const days = Math.floor(totalSeconds / (3600 * 24));
-      const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
-
-    if (completed.length === 0) {
-      container.innerHTML = '<p>No completed tasks yet.</p>';
+    if (completedTasks.length === 0) {
+      noTasks.style.display = "block";
     } else {
-      completed.forEach(task => {
-        const taskEl = document.createElement("div");
-        taskEl.className = `task-history-item ${task.type}`;
-        const remainingString = formatRemainingTime(task.deadline, task.addedAt);
-        taskEl.innerHTML = `
-          <div class="task-title">${task.title}</div>
-          <div class="task-detail">Type: ${task.type}</div>
-          <div class="task-detail">Due: ${new Date(task.deadline).toLocaleString()}</div>
-          <div class="task-detail">Completed At: ${new Date(task.completedAt).toLocaleString()}</div>
-          <div class="task-detail">Time Given: ${remainingString}</div>
+      completedTasks.forEach(task => {
+        const card = document.createElement("div");
+        let typeClass = "";
+        let icon = "";
+
+        switch (task.type.toLowerCase()) {
+          case 'quiz':
+            typeClass = 'quiz-card';
+            icon = '📝';
+            break;
+          case 'assignment':
+            typeClass = 'assignment-card';
+            icon = '📚';
+            break;
+          case 'project':
+            typeClass = 'project-card';
+            icon = '💻';
+            break;
+          default:
+            typeClass = '';
+            icon = '📌';
+        }
+
+        card.className = `task-card ${typeClass}`;
+        card.innerHTML = `
+          <div class="task-header"><span class="icon">${icon}</span>${task.title}</div>
+          <div class="task-meta">Type: ${task.type}</div>
+          <div class="task-meta">Deadline: ${new Date(task.deadline).toLocaleString()}</div>
+          <div class="task-meta">Created At: ${new Date(task.createdAt).toLocaleString()}</div>
+          <div class="task-meta">Completed At: ${new Date(task.completedAt).toLocaleString()}</div>
         `;
-        container.appendChild(taskEl);
+        taskContainer.appendChild(card);
       });
     }
+
+    function generateCSV(data) {
+      const header = Object.keys(data[0] || {}).join(",");
+      const rows = data.map(task => Object.values(task).map(val => `"${val}"`).join(","));
+      return [header, ...rows].join("\n");
+    }
+
+    function downloadCSV() {
+      if (!completedTasks.length) return;
+      const csv = generateCSV(completedTasks);
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${currentUser}_completed_tasks.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const night = body.classList.toggle("night");
+      localStorage.setItem("theme", night ? "night" : "light");
+    }
+
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "night") {
+        document.body.classList.add("night");
+      }
+    }
+
+    function goHome() {
+      window.location.href = "index.html";
+    }
+
+    applySavedTheme();
   </script>
 </body>
 </html>
