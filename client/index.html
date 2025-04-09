@@ -75,41 +75,51 @@
 
     main {
       width: 90%;
-      max-width: 1300px;
+      max-width: 1200px;
       margin-bottom: 2rem;
     }
 
-    .task-columns {
+    .task-grid {
       display: flex;
-      flex-direction: column;
-      gap: 2rem;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
     }
 
     .task-column {
-      background: white;
-      padding: 1rem;
+      flex: 1;
+      min-width: 300px;
+      background: #f8fafc;
       border-radius: 1rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    @media (min-width: 768px) {
-      .task-columns {
-        flex-direction: row;
-        justify-content: space-between;
-      }
-
-      .task-column {
-        flex: 1;
-        margin: 0 0.5rem;
-      }
+      padding: 1rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     }
 
     .task-column h2 {
+      margin-top: 0;
       color: #1e3a8a;
       border-bottom: 2px solid #93c5fd;
       padding-bottom: 0.5rem;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .column-counter-mobile {
+      display: none;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: #1e3a8a;
+    }
+
+    @media (max-width: 768px) {
+      .task-grid {
+        flex-direction: column;
+      }
+
+      .column-counter-mobile {
+        display: block;
+      }
     }
 
     .task-item {
@@ -229,7 +239,7 @@
 <body>
   <header>
     <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-      <h1>📚 Course Task Manager</h1>
+      <h1 style="margin: 0;">📚 Course Task Manager</h1>
       <button onclick="window.location.href='course.html'">📘 Courses</button>
       <button onclick="window.location.href='add-course.html'">➕ Add Course</button>
     </div>
@@ -248,22 +258,34 @@
       <option value="assignment">Assignment</option>
       <option value="project">Project</option>
     </select>
-    <button onclick="addTask()">➕ Add Task</button>
+    <button onclick="addTask()" id="addBtn">➕ Add Task</button>
   </section>
 
   <main>
-    <div class="task-columns">
+    <div class="task-grid">
       <div class="task-column">
-        <h2>📝 Quiz Tasks (<span id="quizCount">0</span>)</h2>
+        <h2>
+          📝 <span style="white-space: nowrap;">Quizzes (<span id="quizCount">0</span>)</span>
+        </h2>
+        
         <div id="quizTasks"></div>
+        <div class="column-counter-mobile">📝 Quizzes: <span id="quizCountBelow">0</span></div>
       </div>
+
       <div class="task-column">
-        <h2>📄 Assignment Tasks (<span id="assignmentCount">0</span>)</h2>
+        <h2>
+          📚 <span style="white-space: nowrap;">Assignments (<span id="assignmentCount">0</span>)</span>
+        </h2>
         <div id="assignmentTasks"></div>
+        <div class="column-counter-mobile">📚 Assignments: <span id="assignmentCountBelow">0</span></div>
       </div>
+
       <div class="task-column">
-        <h2>💻 Project Tasks (<span id="projectCount">0</span>)</h2>
+        <h2>
+          💻 <span style="white-space: nowrap;">Projects (<span id="projectCount">0</span>)</span>
+        </h2>
         <div id="projectTasks"></div>
+        <div class="column-counter-mobile">💻 Projects: <span id="projectCountBelow">0</span></div>
       </div>
     </div>
   </main>

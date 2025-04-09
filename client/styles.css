@@ -248,3 +248,8 @@ header button:hover {
   left: -10px;
   top: 20px;
 }
+
+.task-column h2 span {
+  display: inline-block;
+  font-weight: 600;
+}
