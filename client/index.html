@@ -1,50 +1,207 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Course Task Manager</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body class="background-image">
-    <header>
-      <h1>📚 Course Task Manager</h1>
-      <div id="scoreboard">⭐ Score: <span id="scoreDisplay">0</span></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Course Task Manager</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #dbeafe, #f0f9ff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: #1e3a8a;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    header button {
+      margin-left: 1rem;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+
+    header button:hover {
+      background: #2563eb;
+    }
+
+    #taskForm {
+      margin: 2rem 0;
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+    }
+
+    #taskForm input, #taskForm select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    #taskForm button {
+      width: 100%;
+      background: #2563eb;
+    }
+
+    main {
+      width: 90%;
+      max-width: 800px;
+      margin-bottom: 2rem;
+    }
+
+    main h2 {
+      margin-top: 2rem;
+      color: #1e3a8a;
+      border-bottom: 2px solid #93c5fd;
+      padding-bottom: 0.5rem;
+    }
+
+    .task-item {
+      background: #e0f2fe;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .task-content {
+      max-width: 80%;
+    }
+
+    .task-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .task-deadline {
+      color: #475569;
+      margin: 0.3rem 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+    }
+
+    .quiz { background: #fef3c7; color: #92400e; }
+    .assignment { background: #e2e8f0; color: #1e293b; }
+    .project { background: #dcfce7; color: #065f46; }
+
+    .remaining-time {
+      font-size: 0.85rem;
+      color: #1e40af;
+      margin-top: 0.5rem;
+    }
+
+    .complete-btn {
+      background: #16a34a;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .complete-btn:hover {
+      background: #15803d;
+    }
+
+    .progress-bar {
+      margin-top: 0.5rem;
+      height: 8px;
+      background: #cbd5e1;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <h1 style="margin: 0;">📚 Course Task Manager</h1>
+      <button onclick="window.location.href='index.html'">📘 Courses</button>
+      <button onclick="window.location.href='add-course.html'">➕ Add Course</button>
+    </div>
+    <div>
+      <span id="scoreboard">⭐ Score: <span id="scoreDisplay">0</span></span>
       <button id="toggleTheme">🌙 Night Mode</button>
       <button onclick="logout()">🚪 Logout</button>
-    </header>
+    </div>
+  </header>
+  
 
-    <section id="taskForm">
-      <input type="text" id="taskTitle" placeholder="Enter task title..." />
-      <input type="datetime-local" id="taskDeadline" />
-      <select id="taskType">
-        <option value="quiz">Quiz</option>
-        <option value="assignment">Assignment</option>
-        <option value="project">Project</option>
-      </select>
-      <button onclick="addTask()">➕ Add Task</button>
-    </section>
+  <section id="taskForm">
+    <input type="text" id="taskTitle" placeholder="Enter task title..." />
+    <input type="datetime-local" id="taskDeadline" />
+    <select id="taskType">
+      <option value="quiz">Quiz</option>
+      <option value="assignment">Assignment</option>
+      <option value="project">Project</option>
+    </select>
+    <button onclick="addTask()">➕ Add Task</button>
+  </section>
 
-    <main>
-      <h2>📝 Quiz Tasks</h2>
-      <div id="quizTasks"></div>
-      <h2>📄 Assignment Tasks</h2>
-      <div id="assignmentTasks"></div>
-      <h2>💻 Project Tasks</h2>
-      <div id="projectTasks"></div>
-    </main>
+  <main>
+    <h2>📝 Quiz Tasks</h2>
+    <div id="quizTasks"></div>
+    <h2>📄 Assignment Tasks</h2>
+    <div id="assignmentTasks"></div>
+    <h2>💻 Project Tasks</h2>
+    <div id="projectTasks"></div>
+  </main>
 
-    <script src="script.js"></script>
-    <script>
-      // Check user login
-      if (!localStorage.getItem("currentUser")) {
-        window.location.href = "login.html";
-      }
+  <script src="script.js"></script>
+  <script>
+    if (!localStorage.getItem("currentUser")) {
+      window.location.href = "login.html";
+    }
 
-      function logout() {
-        localStorage.removeItem("currentUser");
-        window.location.href = "login.html";
-      }
-    </script>
-  </body>
-  </html>
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
