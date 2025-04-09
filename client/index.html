@@ -6,7 +6,6 @@
   <title>Course Task Manager</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* Same CSS as before, with modal styles added */
     body {
       font-family: "Segoe UI", sans-serif;
       margin: 0;
@@ -76,15 +75,41 @@
 
     main {
       width: 90%;
-      max-width: 800px;
+      max-width: 1300px;
       margin-bottom: 2rem;
     }
 
-    main h2 {
-      margin-top: 2rem;
+    .task-columns {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .task-column {
+      background: white;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (min-width: 768px) {
+      .task-columns {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .task-column {
+        flex: 1;
+        margin: 0 0.5rem;
+      }
+    }
+
+    .task-column h2 {
       color: #1e3a8a;
       border-bottom: 2px solid #93c5fd;
       padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
     }
 
     .task-item {
@@ -157,7 +182,6 @@
       transition: width 0.3s ease;
     }
 
-    /* Modal styles */
     .modal {
       display: none;
       position: fixed;
@@ -205,7 +229,7 @@
 <body>
   <header>
     <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-      <h1 style="margin: 0;">📚 Course Task Manager</h1>
+      <h1>📚 Course Task Manager</h1>
       <button onclick="window.location.href='course.html'">📘 Courses</button>
       <button onclick="window.location.href='add-course.html'">➕ Add Course</button>
     </div>
@@ -228,15 +252,22 @@
   </section>
 
   <main>
-    <h2>📝 Quiz Tasks</h2>
-    <div id="quizTasks"></div>
-    <h2>📄 Assignment Tasks</h2>
-    <div id="assignmentTasks"></div>
-    <h2>💻 Project Tasks</h2>
-    <div id="projectTasks"></div>
+    <div class="task-columns">
+      <div class="task-column">
+        <h2>📝 Quiz Tasks (<span id="quizCount">0</span>)</h2>
+        <div id="quizTasks"></div>
+      </div>
+      <div class="task-column">
+        <h2>📄 Assignment Tasks (<span id="assignmentCount">0</span>)</h2>
+        <div id="assignmentTasks"></div>
+      </div>
+      <div class="task-column">
+        <h2>💻 Project Tasks (<span id="projectCount">0</span>)</h2>
+        <div id="projectTasks"></div>
+      </div>
+    </div>
   </main>
 
-  <!-- Edit Task Modal -->
   <div id="editModal" class="modal">
     <div class="modal-content">
       <input type="text" id="editTaskTitle" placeholder="Edit task title..." />

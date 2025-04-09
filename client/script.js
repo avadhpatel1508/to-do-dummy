@@ -80,6 +80,16 @@ function formatRemainingTime(ms) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
+function updateTaskCounts() {
+  const quizCount = tasks.filter(t => t.type === 'quiz').length;
+  const assignmentCount = tasks.filter(t => t.type === 'assignment').length;
+  const projectCount = tasks.filter(t => t.type === 'project').length;
+
+  document.getElementById("quizCount").textContent = quizCount;
+  document.getElementById("assignmentCount").textContent = assignmentCount;
+  document.getElementById("projectCount").textContent = projectCount;
+}
+
 function renderTasks() {
   const quizTasks = document.getElementById("quizTasks");
   const assignmentTasks = document.getElementById("assignmentTasks");
@@ -117,6 +127,7 @@ function renderTasks() {
   });
 
   document.getElementById("scoreDisplay").textContent = score;
+  updateTaskCounts();
   updateRemainingTimes();
 }
 
