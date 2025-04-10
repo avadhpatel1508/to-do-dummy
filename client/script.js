@@ -153,6 +153,7 @@ function updateRemainingTimes() {
     if (fill) fill.style.width = `${percent}%`;
   });
 }
+
 function checkForNotifications() {
   const now = new Date().getTime();
   let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
@@ -161,19 +162,21 @@ function checkForNotifications() {
     const deadline = new Date(task.deadline).getTime();
     const timeDiff = deadline - now;
 
-    // 24 hours in ms = 86400000
     const is24HrLeft = timeDiff <= 86400000 && timeDiff > 0;
     const alreadyNotified = notifications.find(n => n.title === task.title);
 
     if (is24HrLeft && !alreadyNotified) {
       const message = `Your ${task.type} "${task.title}" deadline is today!`;
-      notifications.push({
+      const notificationObj = {
         title: task.title,
         message,
         type: task.type,
         timestamp: new Date().toISOString(),
         seen: false
-      });
+      };
+
+      notifications.unshift(notificationObj); // Add to start for latest on top
+      sendBrowserNotification("Task Reminder", message);
     }
   });
 
@@ -181,9 +184,38 @@ function checkForNotifications() {
   updateNotificationCounter();
 }
 
+function updateNotificationCounter() {
+  const notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
+  const unseenCount = notifications.filter(n => !n.seen).length;
+
+  const bellIcon = document.getElementById("notificationBell");
+  if (!bellIcon) return;
+
+  let counter = document.getElementById("notificationCount");
+  if (!counter) {
+    counter = document.createElement("span");
+    counter.id = "notificationCount";
+    bellIcon.appendChild(counter);
+  }
+
+  counter.textContent = unseenCount;
+  counter.style.cssText = unseenCount > 0 ? `
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+  ` : `display: none;`;
+}
+
 // Initial rendering
 renderTasks();
+checkForNotifications();
 setInterval(updateRemainingTimes, 1000);
+setInterval(checkForNotifications, 5 * 60 * 1000); // every 5 minutes
 
 // Theme toggle
 const toggleThemeBtn = document.getElementById('toggleTheme');
@@ -212,3 +244,11 @@ scoreboardBtn.addEventListener('click', () => {
   localStorage.setItem("historyPageUser", currentUser);
   window.location.href = "history.html";
 });
+function sendBrowserNotification(title, message) {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body: message });
+  }
+}
+if ("Notification" in window && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
