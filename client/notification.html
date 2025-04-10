@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Task Notifications</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>🔔 Task Notifications</h1>
+  <ul id="notificationListPage"></ul>
+
+  <script>
+    const currentUser = localStorage.getItem("currentUser") || "guest";
+    const tasks = JSON.parse(localStorage.getItem(`${currentUser}_tasks`)) || [];
+    const notificationsSeen = JSON.parse(localStorage.getItem(`${currentUser}_notifications_seen`)) || {};
+    const list = document.getElementById("notificationListPage");
+    const now = new Date().getTime();
+
+    list.innerHTML = "";
+
+    tasks.forEach(task => {
+      const deadline = new Date(task.deadline).getTime();
+      const timeDiff = deadline - now;
+
+      if (timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000) {
+        const li = document.createElement("li");
+        const hoursLeft = Math.ceil(timeDiff / (60 * 60 * 1000));
+        const isSeen = notificationsSeen[task.title];
+
+        li.innerHTML = `${task.title} is due in ${hoursLeft} hours${isSeen ? "" : " 🔴"}`;
+        notificationsSeen[task.title] = true;
+        list.appendChild(li);
+      }
+    });
+
+    localStorage.setItem(`${currentUser}_notifications_seen`, JSON.stringify(notificationsSeen));
+  </script>
+</body>
+</html>

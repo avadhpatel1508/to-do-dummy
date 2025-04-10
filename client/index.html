@@ -49,14 +49,42 @@
       background: #2563eb;
     }
 
+    .notification-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      position: relative;
+      margin-right: 1rem;
+    }
+
+    .notification-btn:hover::after {
+      content: 'Notifications';
+      position: absolute;
+      bottom: -1.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e3a8a;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
     #taskForm {
-      margin: 2rem 0;
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      right: 30px;
       background: white;
       padding: 2rem;
       border-radius: 1rem;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
       width: 90%;
-      max-width: 600px;
+      max-width: 400px;
+      z-index: 999;
     }
 
     #taskForm input, #taskForm select {
@@ -71,6 +99,40 @@
     #taskForm button {
       width: 100%;
       background: #2563eb;
+    }
+
+    .floating-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      font-size: 2rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .floating-btn::after {
+      content: "Add Task";
+      position: absolute;
+      bottom: 70px;
+      right: 0;
+      background: #1e3a8a;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .floating-btn:hover::after {
+      opacity: 1;
     }
 
     main {
@@ -100,9 +162,12 @@
       color: #1e3a8a;
       border-bottom: 2px solid #93c5fd;
       padding-bottom: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.3rem;
+      flex-wrap: wrap;
     }
 
     .column-counter-mobile {
@@ -243,7 +308,8 @@
       <button onclick="window.location.href='course.html'">📘 Courses</button>
       <button onclick="window.location.href='add-course.html'">➕ Add Course</button>
     </div>
-    <div>
+    <div style="display: flex; align-items: center;">
+      <button class="notification-btn" onclick="window.location.href='notification.html'">🔔</button>
       <span id="scoreboard">⭐ Score: <span id="scoreDisplay">0</span></span>
       <button id="toggleTheme">🌙 Night Mode</button>
       <button onclick="logout()">🚪 Logout</button>
@@ -261,29 +327,24 @@
     <button onclick="addTask()" id="addBtn">➕ Add Task</button>
   </section>
 
+  <button class="floating-btn" onclick="toggleTaskForm()">＋</button>
+
   <main>
     <div class="task-grid">
       <div class="task-column">
-        <h2>
-          📝 <span style="white-space: nowrap;">Quizzes (<span id="quizCount">0</span>)</span>
-        </h2>
-        
+        <h2>📝 <span style="font-weight: bold;">Quizzes</span> (<span id="quizCount">0</span>)</h2>
         <div id="quizTasks"></div>
         <div class="column-counter-mobile">📝 Quizzes: <span id="quizCountBelow">0</span></div>
       </div>
 
       <div class="task-column">
-        <h2>
-          📚 <span style="white-space: nowrap;">Assignments (<span id="assignmentCount">0</span>)</span>
-        </h2>
+        <h2>📚 <span style="font-weight: bold;">Assignments</span> (<span id="assignmentCount">0</span>)</h2>
         <div id="assignmentTasks"></div>
         <div class="column-counter-mobile">📚 Assignments: <span id="assignmentCountBelow">0</span></div>
       </div>
 
       <div class="task-column">
-        <h2>
-          💻 <span style="white-space: nowrap;">Projects (<span id="projectCount">0</span>)</span>
-        </h2>
+        <h2>💻 <span style="font-weight: bold;">Projects</span> (<span id="projectCount">0</span>)</h2>
         <div id="projectTasks"></div>
         <div class="column-counter-mobile">💻 Projects: <span id="projectCountBelow">0</span></div>
       </div>
@@ -313,6 +374,11 @@
     function logout() {
       localStorage.removeItem("currentUser");
       window.location.href = "login.html";
+    }
+
+    function toggleTaskForm() {
+      const form = document.getElementById("taskForm");
+      form.style.display = form.style.display === "block" ? "none" : "block";
     }
   </script>
 </body>
