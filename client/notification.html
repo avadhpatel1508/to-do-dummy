@@ -2,39 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Task Notifications</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Notifications</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>🔔 Task Notifications</h1>
-  <ul id="notificationListPage"></ul>
+  <h2>Notifications</h2>
+  <div id="notificationList"></div>
 
   <script>
     const currentUser = localStorage.getItem("currentUser") || "guest";
-    const tasks = JSON.parse(localStorage.getItem(`${currentUser}_tasks`)) || [];
-    const notificationsSeen = JSON.parse(localStorage.getItem(`${currentUser}_notifications_seen`)) || {};
-    const list = document.getElementById("notificationListPage");
-    const now = new Date().getTime();
+    const notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
 
-    list.innerHTML = "";
+    const list = document.getElementById("notificationList");
+    if (notifications.length === 0) {
+      list.innerHTML = "<p>No notifications yet.</p>";
+    } else {
+      notifications.forEach(n => {
+        const el = document.createElement("div");
+        el.className = "notification";
+        el.innerHTML = `<strong>${n.type.toUpperCase()}</strong>: ${n.message}<br><small>${new Date(n.timestamp).toLocaleString()}</small>`;
+        list.appendChild(el);
+      });
+    }
 
-    tasks.forEach(task => {
-      const deadline = new Date(task.deadline).getTime();
-      const timeDiff = deadline - now;
-
-      if (timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000) {
-        const li = document.createElement("li");
-        const hoursLeft = Math.ceil(timeDiff / (60 * 60 * 1000));
-        const isSeen = notificationsSeen[task.title];
-
-        li.innerHTML = `${task.title} is due in ${hoursLeft} hours${isSeen ? "" : " 🔴"}`;
-        notificationsSeen[task.title] = true;
-        list.appendChild(li);
-      }
-    });
-
-    localStorage.setItem(`${currentUser}_notifications_seen`, JSON.stringify(notificationsSeen));
+    // Mark all as seen
+    notifications.forEach(n => n.seen = true);
+    localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
   </script>
 </body>
 </html>

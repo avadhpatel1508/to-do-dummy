@@ -153,6 +153,33 @@ function updateRemainingTimes() {
     if (fill) fill.style.width = `${percent}%`;
   });
 }
+function checkForNotifications() {
+  const now = new Date().getTime();
+  let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
+
+  tasks.forEach(task => {
+    const deadline = new Date(task.deadline).getTime();
+    const timeDiff = deadline - now;
+
+    // 24 hours in ms = 86400000
+    const is24HrLeft = timeDiff <= 86400000 && timeDiff > 0;
+    const alreadyNotified = notifications.find(n => n.title === task.title);
+
+    if (is24HrLeft && !alreadyNotified) {
+      const message = `Your ${task.type} "${task.title}" deadline is today!`;
+      notifications.push({
+        title: task.title,
+        message,
+        type: task.type,
+        timestamp: new Date().toISOString(),
+        seen: false
+      });
+    }
+  });
+
+  localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
+  updateNotificationCounter();
+}
 
 // Initial rendering
 renderTasks();

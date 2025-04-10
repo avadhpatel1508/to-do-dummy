@@ -253,3 +253,26 @@ header button:hover {
   display: inline-block;
   font-weight: 600;
 }
+.icon-button {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.notification-count {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  display: none;
+}
+footer a:hover {
+  text-decoration: underline;
+  color: #bfdbfe;
+}
