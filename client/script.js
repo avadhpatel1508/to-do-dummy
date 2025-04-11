@@ -111,9 +111,7 @@ function renderTasks() {
         <div class="task-deadline">Due: ${new Date(task.deadline).toLocaleString()}</div>
         <div class="task-type badge ${task.type}">${task.type}</div>
         <div class="remaining-time" data-title="${task.title}"></div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill"></div>
-        </div>
+        <div class="progress-bar"><div class="progress-bar-fill"></div></div>
       </div>
       <div class="task-controls">
         <button class="complete-btn" onclick="completeTask(${index})">✅ Complete</button>
@@ -154,6 +152,15 @@ function updateRemainingTimes() {
   });
 }
 
+function playNotificationSoundAndVibrate() {
+  const audio = new Audio("sounds/notify.mp3");
+  audio.play().catch(err => console.log("Sound error:", err));
+
+  if ("vibrate" in navigator) {
+    navigator.vibrate([200, 100, 200]);
+  }
+}
+
 function checkForNotifications() {
   const now = new Date().getTime();
   let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
@@ -161,12 +168,11 @@ function checkForNotifications() {
   tasks.forEach(task => {
     const deadline = new Date(task.deadline).getTime();
     const timeDiff = deadline - now;
-
     const is24HrLeft = timeDiff <= 86400000 && timeDiff > 0;
     const alreadyNotified = notifications.find(n => n.title === task.title);
 
     if (is24HrLeft && !alreadyNotified) {
-      const message = `Your ${task.type} "${task.title}" deadline is today!`;
+      const message = `Your ${task.type} "${task.title}" deadline is within 24 hours!`;
       const notificationObj = {
         title: task.title,
         message,
@@ -175,8 +181,9 @@ function checkForNotifications() {
         seen: false
       };
 
-      notifications.unshift(notificationObj); // Add to start for latest on top
-      sendBrowserNotification("Task Reminder", message);
+      notifications.unshift(notificationObj);
+      sendBrowserNotification("⏰ Task Reminder", message);
+      playNotificationSoundAndVibrate();
     }
   });
 
@@ -211,11 +218,21 @@ function updateNotificationCounter() {
   ` : `display: none;`;
 }
 
+function sendBrowserNotification(title, message) {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body: message });
+  }
+}
+
+if ("Notification" in window && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+
 // Initial rendering
 renderTasks();
 checkForNotifications();
 setInterval(updateRemainingTimes, 1000);
-setInterval(checkForNotifications, 5 * 60 * 1000); // every 5 minutes
+setInterval(checkForNotifications, 60000);
 
 // Theme toggle
 const toggleThemeBtn = document.getElementById('toggleTheme');
@@ -244,11 +261,47 @@ scoreboardBtn.addEventListener('click', () => {
   localStorage.setItem("historyPageUser", currentUser);
   window.location.href = "history.html";
 });
-function sendBrowserNotification(title, message) {
-  if (Notification.permission === "granted") {
-    new Notification(title, { body: message });
-  }
+
+// Duplicate 24hr task reminder (fallback)
+function notifyUpcomingTasks() {
+  if (!("Notification" in window)) return;
+
+  Notification.requestPermission().then(permission => {
+    if (permission !== "granted") return;
+
+    const now = Date.now();
+    const tasks = JSON.parse(localStorage.getItem(`${currentUser}_tasks`)) || [];
+    let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
+
+    tasks.forEach(task => {
+      const deadlineTime = new Date(task.deadline).getTime();
+      const timeLeft = deadlineTime - now;
+      const alreadyNotified = notifications.find(n => n.title === task.title);
+
+      if (timeLeft < 86400000 && timeLeft > 0 && !alreadyNotified) {
+        const message = `⏰ "${task.title}" is due soon!`;
+
+        notifications.unshift({
+          title: task.title,
+          message,
+          type: task.type,
+          timestamp: new Date().toISOString(),
+          seen: false
+        });
+
+        new Notification("⏰ Task Reminder", {
+          body: message,
+          icon: "icons/reminder.png"
+        });
+
+        playNotificationSoundAndVibrate();
+      }
+    });
+
+    localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
+    updateNotificationCounter();
+  });
 }
-if ("Notification" in window && Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
+
+notifyUpcomingTasks();
+setInterval(notifyUpcomingTasks, 60000);

@@ -2,92 +2,145 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Notifications</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8fafc;
       margin: 0;
       padding: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(to right, #e0f2fe, #f0f9ff);
-      min-height: 100vh;
+    }
+
+    .night body {
+      background-color: #111827;
+      color: white;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .notification-header {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
+      margin-bottom: 1rem;
     }
 
-    h2 {
-      margin: 2rem 0 1rem;
-      color: #1e3a8a;
-      text-align: center;
+    .notification-header h2 {
+      margin: 0;
     }
 
-    #notificationList {
-      width: 90%;
-      max-width: 800px;
+    .back-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .notification-list {
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      margin-bottom: 3rem;
     }
 
-    .notification {
-      background: #ffffff;
-      border-left: 6px solid #3b82f6;
-      padding: 1rem 1.5rem;
+    .notification-card {
+      background: white;
+      padding: 1rem;
       border-radius: 10px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-      transition: transform 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+      transition: 0.3s;
     }
 
-    .notification:hover {
-      transform: scale(1.02);
+    .night .notification-card {
+      background-color: #1f2937;
+      color: white;
     }
 
-    .notification strong {
-      color: #1e40af;
-      display: block;
-      font-size: 1.05rem;
-      margin-bottom: 0.4rem;
+    .notification-card.unseen::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 10px;
+      height: 10px;
+      background: red;
+      border-radius: 50%;
     }
 
-    .notification small {
-      color: #64748b;
-      font-size: 0.85rem;
-      display: block;
+    .notification-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .notification-type {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .notification-time {
       margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #9ca3af;
     }
 
-    @media (max-width: 600px) {
-      .notification {
-        padding: 1rem;
-      }
+    .no-notification {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #6b7280;
     }
   </style>
 </head>
 <body>
-  <h2>🔔 Notifications</h2>
-  <div id="notificationList"></div>
+  <div class="container">
+    <div class="notification-header">
+      <h2>🔔 Notifications</h2>
+      <button class="back-btn" onclick="goBack()">⬅️ Back</button>
+    </div>
+    <div id="notificationList" class="notification-list"></div>
+  </div>
 
   <script>
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
     const currentUser = localStorage.getItem("currentUser") || "guest";
     const notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
 
-    const list = document.getElementById("notificationList");
+    const listEl = document.getElementById("notificationList");
+
     if (notifications.length === 0) {
-      list.innerHTML = "<p style='color: #475569;'>No notifications yet.</p>";
+      listEl.innerHTML = `<div class="no-notification">No notifications yet 🎉</div>`;
     } else {
       notifications.forEach(n => {
-        const el = document.createElement("div");
-        el.className = "notification";
-        el.innerHTML = `<strong>${n.type.toUpperCase()}</strong>${n.message}<small>${new Date(n.timestamp).toLocaleString()}</small>`;
-        list.appendChild(el);
+        const card = document.createElement("div");
+        card.className = "notification-card" + (!n.seen ? " unseen" : "");
+        card.innerHTML = `
+          <div class="notification-title">${n.message}</div>
+          <div class="notification-type">Type: ${n.type}</div>
+          <div class="notification-time">${new Date(n.timestamp).toLocaleString()}</div>
+        `;
+        listEl.appendChild(card);
       });
+
+      // Mark all as seen
+      notifications.forEach(n => n.seen = true);
+      localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
     }
 
-    // Mark all as seen
-    notifications.forEach(n => n.seen = true);
-    localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
+    // Theme support
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'night') {
+      document.body.classList.add('night');
+    }
   </script>
 </body>
 </html>
