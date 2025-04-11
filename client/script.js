@@ -152,15 +152,6 @@ function updateRemainingTimes() {
   });
 }
 
-function playNotificationSoundAndVibrate() {
-  const audio = new Audio("sounds/notify.mp3");
-  audio.play().catch(err => console.log("Sound error:", err));
-
-  if ("vibrate" in navigator) {
-    navigator.vibrate([200, 100, 200]);
-  }
-}
-
 function checkForNotifications() {
   const now = new Date().getTime();
   let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
@@ -181,9 +172,8 @@ function checkForNotifications() {
         seen: false
       };
 
-      notifications.unshift(notificationObj);
+      notifications.unshift(notificationObj); // latest on top
       sendBrowserNotification("⏰ Task Reminder", message);
-      playNotificationSoundAndVibrate();
     }
   });
 
@@ -232,7 +222,7 @@ if ("Notification" in window && Notification.permission !== "granted") {
 renderTasks();
 checkForNotifications();
 setInterval(updateRemainingTimes, 1000);
-setInterval(checkForNotifications, 60000);
+setInterval(checkForNotifications, 60000); // every 1 minute
 
 // Theme toggle
 const toggleThemeBtn = document.getElementById('toggleTheme');
@@ -261,8 +251,6 @@ scoreboardBtn.addEventListener('click', () => {
   localStorage.setItem("historyPageUser", currentUser);
   window.location.href = "history.html";
 });
-
-// Duplicate 24hr task reminder (fallback)
 function notifyUpcomingTasks() {
   if (!("Notification" in window)) return;
 
@@ -281,6 +269,7 @@ function notifyUpcomingTasks() {
       if (timeLeft < 86400000 && timeLeft > 0 && !alreadyNotified) {
         const message = `⏰ "${task.title}" is due soon!`;
 
+        // Store notification for bell and notification.html
         notifications.unshift({
           title: task.title,
           message,
@@ -289,12 +278,11 @@ function notifyUpcomingTasks() {
           seen: false
         });
 
+        // Send browser notification
         new Notification("⏰ Task Reminder", {
           body: message,
-          icon: "icons/reminder.png"
+          icon: "icons/reminder.png" // optional
         });
-
-        playNotificationSoundAndVibrate();
       }
     });
 
@@ -303,5 +291,6 @@ function notifyUpcomingTasks() {
   });
 }
 
+// ✅ Run it when page loads AND every minute
 notifyUpcomingTasks();
 setInterval(notifyUpcomingTasks, 60000);
