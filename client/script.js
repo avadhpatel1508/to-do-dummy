@@ -111,7 +111,9 @@ function renderTasks() {
         <div class="task-deadline">Due: ${new Date(task.deadline).toLocaleString()}</div>
         <div class="task-type badge ${task.type}">${task.type}</div>
         <div class="remaining-time" data-title="${task.title}"></div>
-        <div class="progress-bar"><div class="progress-bar-fill"></div></div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill"></div>
+        </div>
       </div>
       <div class="task-controls">
         <button class="complete-btn" onclick="completeTask(${index})">✅ Complete</button>
@@ -151,7 +153,6 @@ function updateRemainingTimes() {
     if (fill) fill.style.width = `${percent}%`;
   });
 }
-
 function checkForNotifications() {
   const now = new Date().getTime();
   let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
@@ -159,21 +160,20 @@ function checkForNotifications() {
   tasks.forEach(task => {
     const deadline = new Date(task.deadline).getTime();
     const timeDiff = deadline - now;
+
+    // 24 hours in ms = 86400000
     const is24HrLeft = timeDiff <= 86400000 && timeDiff > 0;
     const alreadyNotified = notifications.find(n => n.title === task.title);
 
     if (is24HrLeft && !alreadyNotified) {
-      const message = `Your ${task.type} "${task.title}" deadline is within 24 hours!`;
-      const notificationObj = {
+      const message = `Your ${task.type} "${task.title}" deadline is today!`;
+      notifications.push({
         title: task.title,
         message,
         type: task.type,
         timestamp: new Date().toISOString(),
         seen: false
-      };
-
-      notifications.unshift(notificationObj); // latest on top
-      sendBrowserNotification("⏰ Task Reminder", message);
+      });
     }
   });
 
@@ -181,48 +181,9 @@ function checkForNotifications() {
   updateNotificationCounter();
 }
 
-function updateNotificationCounter() {
-  const notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
-  const unseenCount = notifications.filter(n => !n.seen).length;
-
-  const bellIcon = document.getElementById("notificationBell");
-  if (!bellIcon) return;
-
-  let counter = document.getElementById("notificationCount");
-  if (!counter) {
-    counter = document.createElement("span");
-    counter.id = "notificationCount";
-    bellIcon.appendChild(counter);
-  }
-
-  counter.textContent = unseenCount;
-  counter.style.cssText = unseenCount > 0 ? `
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: red;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-  ` : `display: none;`;
-}
-
-function sendBrowserNotification(title, message) {
-  if (Notification.permission === "granted") {
-    new Notification(title, { body: message });
-  }
-}
-
-if ("Notification" in window && Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
-
 // Initial rendering
 renderTasks();
-checkForNotifications();
 setInterval(updateRemainingTimes, 1000);
-setInterval(checkForNotifications, 60000); // every 1 minute
 
 // Theme toggle
 const toggleThemeBtn = document.getElementById('toggleTheme');
@@ -251,46 +212,3 @@ scoreboardBtn.addEventListener('click', () => {
   localStorage.setItem("historyPageUser", currentUser);
   window.location.href = "history.html";
 });
-function notifyUpcomingTasks() {
-  if (!("Notification" in window)) return;
-
-  Notification.requestPermission().then(permission => {
-    if (permission !== "granted") return;
-
-    const now = Date.now();
-    const tasks = JSON.parse(localStorage.getItem(`${currentUser}_tasks`)) || [];
-    let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
-
-    tasks.forEach(task => {
-      const deadlineTime = new Date(task.deadline).getTime();
-      const timeLeft = deadlineTime - now;
-      const alreadyNotified = notifications.find(n => n.title === task.title);
-
-      if (timeLeft < 86400000 && timeLeft > 0 && !alreadyNotified) {
-        const message = `⏰ "${task.title}" is due soon!`;
-
-        // Store notification for bell and notification.html
-        notifications.unshift({
-          title: task.title,
-          message,
-          type: task.type,
-          timestamp: new Date().toISOString(),
-          seen: false
-        });
-
-        // Send browser notification
-        new Notification("⏰ Task Reminder", {
-          body: message,
-          icon: "icons/reminder.png" // optional
-        });
-      }
-    });
-
-    localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
-    updateNotificationCounter();
-  });
-}
-
-// ✅ Run it when page loads AND every minute
-notifyUpcomingTasks();
-setInterval(notifyUpcomingTasks, 60000);
