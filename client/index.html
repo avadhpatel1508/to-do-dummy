@@ -82,10 +82,14 @@
       padding: 2rem;
       border-radius: 1rem;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      width: 90%;
+      width: 90vw; /* responsive width */
       max-width: 400px;
       z-index: 999;
+      max-height: 80vh; /* ensures it stays inside the screen */
+      overflow-y: auto;
+      box-sizing: border-box;
     }
+    
 
     #taskForm input, #taskForm select {
       width: 100%;
@@ -299,6 +303,26 @@
       cursor: pointer;
       width: 100%;
     }
+    @media (max-width: 600px) {
+      .floating-btn {
+        bottom: 80px;
+      }
+    
+      .floating-btn::after {
+        bottom: 90px;
+        font-size: 0.75rem;
+      }
+    
+      #taskForm {
+        right: 5%;
+        left: 5%;
+        width: 90%;
+        bottom: 100px;
+        padding: 1.5rem;
+      }
+    }
+    
+    
   </style>
 </head>
 <body>

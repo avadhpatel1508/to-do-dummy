@@ -111,9 +111,7 @@ function renderTasks() {
         <div class="task-deadline">Due: ${new Date(task.deadline).toLocaleString()}</div>
         <div class="task-type badge ${task.type}">${task.type}</div>
         <div class="remaining-time" data-title="${task.title}"></div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill"></div>
-        </div>
+        <div class="progress-bar"><div class="progress-bar-fill"></div></div>
       </div>
       <div class="task-controls">
         <button class="complete-btn" onclick="completeTask(${index})">✅ Complete</button>
@@ -153,37 +151,77 @@ function updateRemainingTimes() {
     if (fill) fill.style.width = `${percent}%`;
   });
 }
-function checkForNotifications() {
-  const now = new Date().getTime();
-  let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
 
-  tasks.forEach(task => {
-    const deadline = new Date(task.deadline).getTime();
-    const timeDiff = deadline - now;
+function updateNotificationCounter() {
+  const notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
+  const unseenCount = notifications.filter(n => !n.seen).length;
 
-    // 24 hours in ms = 86400000
-    const is24HrLeft = timeDiff <= 86400000 && timeDiff > 0;
-    const alreadyNotified = notifications.find(n => n.title === task.title);
+  const bellIcon = document.getElementById("notificationBell");
+  if (!bellIcon) return;
 
-    if (is24HrLeft && !alreadyNotified) {
-      const message = `Your ${task.type} "${task.title}" deadline is today!`;
-      notifications.push({
-        title: task.title,
-        message,
-        type: task.type,
-        timestamp: new Date().toISOString(),
-        seen: false
-      });
-    }
+  let counter = document.getElementById("notificationCount");
+  if (!counter) {
+    counter = document.createElement("span");
+    counter.id = "notificationCount";
+    bellIcon.appendChild(counter);
+  }
+
+  counter.textContent = unseenCount;
+  counter.style.cssText = unseenCount > 0 ? `
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+  ` : `display: none;`;
+}
+
+function notifyUpcomingTasks() {
+  if (!("Notification" in window)) return;
+
+  Notification.requestPermission().then(permission => {
+    if (permission !== "granted") return;
+
+    const now = Date.now();
+    const tasks = JSON.parse(localStorage.getItem(`${currentUser}_tasks`)) || [];
+    let notifications = JSON.parse(localStorage.getItem(`${currentUser}_notifications`)) || [];
+
+    tasks.forEach(task => {
+      const deadlineTime = new Date(task.deadline).getTime();
+      const timeLeft = deadlineTime - now;
+      const alreadyNotified = notifications.find(n => n.title === task.title);
+
+      if (timeLeft <= 86400000 && timeLeft > 0 && !alreadyNotified) {
+        const message = `⏰ "${task.title}" is due within 24 hours!`;
+
+        notifications.unshift({
+          title: task.title,
+          message,
+          type: task.type,
+          timestamp: new Date().toISOString(),
+          seen: false
+        });
+
+        new Notification("⏰ Task Reminder", {
+          body: message,
+          icon: "icons/reminder.png" // optional
+        });
+      }
+    });
+
+    localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
+    updateNotificationCounter();
   });
-
-  localStorage.setItem(`${currentUser}_notifications`, JSON.stringify(notifications));
-  updateNotificationCounter();
 }
 
 // Initial rendering
 renderTasks();
 setInterval(updateRemainingTimes, 1000);
+notifyUpcomingTasks();
+setInterval(notifyUpcomingTasks, 60000); // every minute
 
 // Theme toggle
 const toggleThemeBtn = document.getElementById('toggleTheme');
